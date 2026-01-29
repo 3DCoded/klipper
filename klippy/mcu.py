@@ -714,7 +714,12 @@ class MCUConnectHelper:
         self._reactor = printer.get_reactor()
         self._name = name = mcu.get_name()
         # Serial port
-        self._serial = serialhdl.SerialReader(self._reactor, mcu_name=name)
+        wp = "mcu '%s': " % (self._name)
+        self._serial = serialhdl.SerialReader(
+            self._reactor,
+            warn_prefix=wp,
+            mcu_name=self._name
+        )
         self._baud = 0
         self._canbus_iface = None
         canbus_uuid = config.get('canbus_uuid', None)
@@ -1145,6 +1150,25 @@ class MCU:
         return self._clocksync.clock32_to_clock64(clock32)
     def calibrate_clock(self, print_time, eventtime):
         offset, freq = self._clocksync.calibrate_clock(print_time, eventtime)
+        self._ffi_lib.steppersync_set_time(self._steppersync, offset, freq)
+        if (self._clocksync.is_active() or self.is_fileoutput()
+            or self._is_timeout):
+            return
+        self._is_timeout = True
+        logging.info("Timeout with MCU '%s' (eventtime=%f)",
+                     self._name, eventtime)
+        error_message = (
+            "Lost communication with MCU '%s'. Check MCU connection."
+        ) % self._name
+        self._serial.current_error_description = error_message
+        self._printer.invoke_shutdown(error_message)
+    # Misc external commands
+    def is_fileoutput(self):
+        return self._printer.get_start_args().get('debugoutput') is not None
+    def is_shutdown(self):
+        return self._is_shutdown
+    def get_shutdown_clock(self):
+        return self._shutdown_clock
         self._conn_helper.check_timeout(eventtime)
         return offset, freq
     # Statistics wrappers
