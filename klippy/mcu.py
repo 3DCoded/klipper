@@ -974,6 +974,7 @@ class MCUConfigHelper:
             raise error("MCU '%s' error during config: %s" % (
                 self._name, self._conn_helper.get_shutdown_msg()))
         if config_params['is_shutdown']:
+            self._printer.request_exit('firmware_restart') # Auto-restart
             raise error("Can not update MCU '%s' config as it is shutdown" % (
                 self._name,))
         return config_params
