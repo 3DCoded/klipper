@@ -12,9 +12,9 @@ class error(Exception):
     pass
 
 class SerialReader:
-    def __init__(self, reactor, mcu_name=""):
+    def __init__(self, reactor, mcu_name="", warn_prefix=""):
         self.reactor = reactor
-        self.warn_prefix = ""
+        self.warn_prefix = warn_prefix
         self.mcu_name = mcu_name
         if self.mcu_name:
             self.warn_prefix = "mcu '%s': " % (self.mcu_name)
