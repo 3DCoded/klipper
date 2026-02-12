@@ -42,15 +42,27 @@ class ManualStepper:
         gcode.register_mux_command('MANUAL_STEPPER', "STEPPER",
                                    stepper_name, self.cmd_MANUAL_STEPPER,
                                    desc=self.cmd_MANUAL_STEPPER_help)
+        
+        wh = self.printer.lookup_object('webhooks')
+        wh.register_mux_endpoint('manual_stepper/move', 'motor', stepper_name, self._api_move)
+        
+    def _api_move(self, req):
+        dist = float(req.get('dist'))
+        speed = float(req.get('speed'))
+        accel = 999
+        self.do_move(dist, speed, accel, False)
+        req.send('move queued')
+        
     def get_name(self):
         return self.name
     def sync_print_time(self):
         toolhead = self.printer.lookup_object('toolhead')
         print_time = toolhead.get_last_move_time()
-        if self.next_cmd_time > print_time:
-            toolhead.dwell(self.next_cmd_time - print_time)
-        else:
-            self.next_cmd_time = print_time
+        # if self.next_cmd_time > print_time:
+        #     toolhead.dwell(self.next_cmd_time - print_time)
+        # else:
+        #     self.next_cmd_time = print_time
+        self.next_cmd_time = max(self.next_cmd_time, print_time)
     def do_enable(self, enable):
         stepper_names = [s.get_name() for s in self.steppers]
         stepper_enable = self.printer.lookup_object('stepper_enable')
