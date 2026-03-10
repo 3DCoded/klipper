@@ -31,6 +31,10 @@ class GCodeCommand:
         # Method wrappers
         self.respond_info = gcode.respond_info
         self.respond_raw = gcode.respond_raw
+        
+        if self.get_int('_SILENT', 0): # Equivelant of > /dev/null
+            self.respond_info = lambda msg, log=True: None # Silent mode
+            
     def get_command(self):
         return self._command
     def get_commandline(self):
