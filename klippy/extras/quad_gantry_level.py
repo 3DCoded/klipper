@@ -4,6 +4,7 @@
 #
 # This file may be distributed under the terms of the GNU GPLv3 license.
 import logging
+from collections import namedtuple
 from . import probe, z_tilt
 
 # Leveling code for XY rails that are controlled by Z steppers as in:
@@ -54,6 +55,12 @@ class QuadGantryLevel:
         self.retry_helper.start(gcmd)
         self.probe_helper.start_probe(gcmd)
     def probe_finalize(self, positions):
+        self.gcode.respond_info(f'Positions: {positions}')
+        
+        Pos = namedtuple('ProbedPosition', ('bed_x', 'bed_y', 'bed_z'))
+        new_positions = [Pos(*p) for p in positions]
+        positions = new_positions
+        
         # Mirror our perspective so the adjustments make sense
         # from the perspective of the gantry
         z_positions = [self.horizontal_move_z - p.bed_z for p in positions]
