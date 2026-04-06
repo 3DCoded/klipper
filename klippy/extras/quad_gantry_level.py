@@ -58,7 +58,7 @@ class QuadGantryLevel:
         self.gcode.respond_info(f'Positions: {positions}')
         
         Pos = namedtuple('ProbedPosition', ('bed_x', 'bed_y', 'bed_z'))
-        new_positions = [Pos(*(p[:4])) for p in positions]
+        new_positions = [Pos(*(p[:3])) for p in positions]
         positions = new_positions
         
         # Mirror our perspective so the adjustments make sense
