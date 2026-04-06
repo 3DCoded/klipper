@@ -54,9 +54,7 @@ class QuadGantryLevel:
         self.z_status.reset()
         self.retry_helper.start(gcmd)
         self.probe_helper.start_probe(gcmd)
-    def probe_finalize(self, positions):
-        self.gcode.respond_info(f'Positions: {positions}')
-        
+    def probe_finalize(self, positions):        
         Pos = namedtuple('ProbedPosition', ('bed_x', 'bed_y', 'bed_z'))
         new_positions = [Pos(*(p[:3])) for p in positions]
         positions = new_positions
